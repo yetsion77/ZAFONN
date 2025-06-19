@@ -35,17 +35,44 @@ document.addEventListener('DOMContentLoaded', () => {
     let sortable;
     const MAX_HIGH_SCORES = 5;
 
-    let currentGameHandcraftedLevels = {};
-    const handcraftedLevelsSource = {
-        1: ['מטולה', 'חיפה', 'תל אביב -יפו', 'באר שבע', 'אילת'],
-        2: ['קצרין', 'כרמיאל', 'נתניה', 'אשקלון', 'שדרות'],
-        3: ['צפת', 'עפולה', 'רעננה', 'רחובות', 'ירוחם'],
-        4: ['קריית שמונה', 'טבריה', 'פתח תקווה', 'ירושלים', 'ערד'],
-        5: ['עכו', 'זכרון יעקב', 'נתניה', 'אשדוד', 'מצפה רמון'],
-        6: ['ראש פינה', 'חדרה', 'ראשון לציון', 'קריית גת', 'דימונה']
-    };
-    const allHandcraftedCities = Object.values(handcraftedLevelsSource).flat();
+    // --- New Tiered Level Data & Logic ---
 
+    // Game-specific generated levels
+    let balancedTierLevels = [];
+    let tier1Shuffled, tier2Shuffled, tier3Shuffled;
+    let tier1Index, tier2Index, tier3Index;
+
+    const fixedLevels = {
+        1: ['מטולה', 'חיפה', 'תל אביב -יפו', 'באר שבע', 'אילת'],
+        2: ['קצרין', 'טבריה', 'נתניה', 'אשקלון', 'מצפה רמון']
+    };
+
+    const balancedTierSource = [
+        'כרמיאל', 'שדרות', 'צפת', 'עפולה', 'רעננה', 'רחובות', 'ירוחם', 'קריית שמונה', 
+        'פתח תקווה', 'ירושלים', 'ערד', 'עכו', 'זכרון יעקב', 'אשדוד', 'ראש פינה', 
+        'חדרה', 'ראשון לציון', 'קריית גת', 'דימונה'
+    ];
+
+    const tier1Source = [
+        'מטולה', 'חיפה', 'תל אביב -יפו', 'באר שבע', 'אילת', 'קצרין', 'כרמיאל', 'נתניה', 'אשקלון', 'שדרות',
+        'צפת', 'עפולה', 'רעננה', 'רחובות', 'ירוחם', 'קריית שמונה', 'טבריה', 'פתח תקווה', 'ירושלים', 'ערד',
+        'עכו', 'זכרון יעקב', 'אשדוד', 'מצפה רמון', 'ראש פינה', 'חדרה', 'ראשון לציון', 'קריית גת', 'דימונה', 'בית שמש'
+    ];
+
+    const tier2Source = [
+        'שלומי', 'מעלות-תרשיחא', 'כפר ורדים', 'קריית ים', 'קריית מוצקין', 'קריית ביאליק', 'טירת כרמל', 'נשר', 'יקנעם עילית', 'קריית טבעון', 'רמת ישי', 'מגדל העמק', 'בית שאן', 'דלית אל-כרמל', 'עספיא',
+        'אור עקיבא', 'פרדס חנה-כרכור', 'בנימינה-גבעת עדה', 'כפר יונה', 'תל מונד', 'אבן יהודה', 'כפר סבא', 'הוד השרון', 'רמת השרון', 'לוד', 'רמלה', 'חולון', 'בת ים', 'רמת גן', 'גבעתיים', 'בני ברק', 'יהוד-מונוסון', 'אור יהודה', 'גבעת שמואל', 'קריית אונו', 'נס ציונה', 'יבנה', 'גדרה',
+        'מבשרת ציון', 'מעלה אדומים',
+        'אופקים', 'נתיבות', 'קריית מלאכי', 'להבים', 'עומר', 'מיתר', 'רהט'
+    ];
+
+    const tier3Source = [
+        'דן', 'דפנה', 'כפר גלעדי', 'כפר בלום', 'שדה נחמיה', 'יסוד המעלה', 'עין גב', 'דגניה א\'', 'אפיקים', 'כפר תבור', 'נהלל', 'שדה אליהו',
+        'קיסריה', 'מעגן מיכאל', 'שפיים', 'געש', 'כפר שמריהו', 'סביון', 'שוהם', 'בית דגן', 'פלמחים', 'ניצנים', 'כפר חב"ד',
+        'אבו גוש', 'צור הדסה', 'הר אדר', 'נווה אילן', 'קריית ענבים',
+        'יד מרדכי', 'נתיב העשרה', 'ניר עם', 'מפלסים', 'כפר עזה', 'סעד', 'בארי', 'רעים', 'נירים', 'כיסופים', 'שדה בוקר', 'משאבי שדה', 'צאלים', 'גבולות'
+    ];
+    
     const facts = {
         'אילת': 'העיר הדרומית ביותר בישראל, מהווה גשר יבשתי בין אסיה לאפריקה.',
         'באר שבע': 'בירת הנגב, מוזכרת בספר בראשית כמקום בו אברהם אבינו כרת ברית.',
@@ -77,12 +104,12 @@ document.addEventListener('DOMContentLoaded', () => {
         score = 0;
         lives = 3;
 
-        // Shuffle the handcrafted levels for the new game
-        const shuffledCities = [...allHandcraftedCities].sort(() => Math.random() - 0.5);
-        currentGameHandcraftedLevels = {};
-        for (let i = 0; i < 6; i++) {
-            currentGameHandcraftedLevels[i + 1] = shuffledCities.slice(i * 5, (i + 1) * 5);
-        }
+        tier1Shuffled = [...tier1Source].sort(() => Math.random() - 0.5);
+        tier2Shuffled = [...tier2Source].sort(() => Math.random() - 0.5);
+        tier3Shuffled = [...tier3Source].sort(() => Math.random() - 0.5);
+        tier1Index = 0;
+        tier2Index = 0;
+        tier3Index = 0;
 
         updateStats();
         await displayHighScores();
@@ -104,12 +131,32 @@ document.addEventListener('DOMContentLoaded', () => {
         checkButton.disabled = false;
 
         currentLocalities = [];
-        
-        if (currentGameHandcraftedLevels[level]) {
-            const levelNames = currentGameHandcraftedLevels[level];
+        let levelNames = [];
+
+        // Try to get a level from the tiers in order.
+        if (tier1Index < tier1Shuffled.length) {
+            if (DEBUG_MODE) console.log(`Serving level from Tier 1`);
+            levelNames = tier1Shuffled.slice(tier1Index, tier1Index + itemsPerLevel);
+            tier1Index += itemsPerLevel;
+        } else if (tier2Index < tier2Shuffled.length) {
+            if (DEBUG_MODE) console.log(`Serving level from Tier 2`);
+            levelNames = tier2Shuffled.slice(tier2Index, tier2Index + itemsPerLevel);
+            tier2Index += itemsPerLevel;
+        } else if (tier3Index < tier3Shuffled.length) {
+            if (DEBUG_MODE) console.log(`Serving level from Tier 3`);
+            levelNames = tier3Shuffled.slice(tier3Index, tier3Index + itemsPerLevel);
+            tier3Index += itemsPerLevel;
+        }
+
+        // If we got names from a tier, find their data.
+        if (levelNames.length > 0) {
             currentLocalities = levelNames.map(name => localities.find(loc => loc.name === name)).filter(Boolean);
-        } else {
-            generateRandomLocalities();
+        }
+        
+        // If after trying all tiers we still have no localities, it's time for random generation.
+        if (currentLocalities.length === 0) {
+             if (DEBUG_MODE) console.log(`All tiers exhausted. Generating a random level.`);
+             generateRandomLocalities();
         }
 
         displayLocalities();
@@ -117,43 +164,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function generateRandomLocalities() {
-        // For the first couple of random levels (7 and 8), ensure a wide geographical spread for an easier start.
-        if (level <= 8) {
-            if (DEBUG_MODE) console.log(`Generating easy random level ${level} using binning method.`);
-            const numBins = itemsPerLevel; // 5
-            const binSize = Math.floor(localities.length / numBins);
-            currentLocalities = [];
-    
-            for (let i = 0; i < numBins; i++) {
-                const start = i * binSize;
-                const end = (i === numBins - 1) ? localities.length : (i + 1) * binSize;
-                const bin = localities.slice(start, end);
-                
-                if (bin.length > 0) {
-                     const randomIndex = Math.floor(Math.random() * bin.length);
-                     currentLocalities.push(bin[randomIndex]);
-                }
-            }
-    
-            // Fallback in case the binning method fails to produce enough localities.
-            if (currentLocalities.length < itemsPerLevel) {
-                if (DEBUG_MODE) console.error("Binning method failed, using fallback random selection.");
-                const shuffled = [...localities].sort(() => 0.5 - Math.random());
-                currentLocalities = shuffled.slice(0, itemsPerLevel);
-            }
-    
-        } else { // For level 9+, use the previous logic with a smoother ramp-up.
-            if (DEBUG_MODE) console.log(`Generating hard random level ${level} using slicing method.`);
-            const totalLocalities = localities.length;
-            const difficultyFactor = (level - 8) * 40; // Starts easy and gets harder
-            const minSliceSize = 100;
-            const sliceSize = Math.max(totalLocalities - difficultyFactor, minSliceSize);
-            const start = Math.floor(Math.random() * (totalLocalities - sliceSize));
-            const selectionPool = localities.slice(start, start + sliceSize);
-    
-            const shuffledPool = [...selectionPool].sort(() => 0.5 - Math.random());
-            currentLocalities = shuffledPool.slice(0, itemsPerLevel);
+        if (DEBUG_MODE) console.log(`Generating hard random level ${level} using slicing method.`);
+        
+        const allTieredLocalities = new Set([...tier1Source, ...tier2Source, ...tier3Source]);
+        const randomPool = localities.filter(loc => !allTieredLocalities.has(loc.name));
+
+        const totalLocalities = randomPool.length;
+        if (totalLocalities < itemsPerLevel) {
+            if (DEBUG_MODE) console.log("Not enough unique random localities left, game might end.");
+            currentLocalities = []; // Or handle game completion
+            return;
         }
+
+        // The old difficulty logic applied to the new, smaller pool of random localities
+        const tierLevels = Math.ceil(tier1Source.length/5) + Math.ceil(tier2Source.length/5) + Math.ceil(tier3Source.length/5);
+        const difficultyFactor = (level - tierLevels) * 20;
+        const minSliceSize = 80;
+        const sliceSize = Math.max(totalLocalities - difficultyFactor, minSliceSize);
+        const start = Math.floor(Math.random() * (totalLocalities - sliceSize));
+        const selectionPool = randomPool.slice(start, start + sliceSize);
+
+        const shuffledPool = [...selectionPool].sort(() => 0.5 - Math.random());
+        currentLocalities = shuffledPool.slice(0, itemsPerLevel);
     }
 
     function displayLocalities() {
@@ -257,7 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
         popupEl.id = 'popup';
 
         const correctOrder = [...currentLocalities].sort((a, b) => b.lat - a.lat);
-        const correctNames = correctOrder.map(loc => loc.name).join(' → ');
+        const correctNames = correctOrder.map(loc => loc.name).join(' ← ');
 
         popupEl.innerHTML = `
             <div class="popup-content">
