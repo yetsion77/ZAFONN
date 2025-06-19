@@ -263,4 +263,36 @@ header p {
 #high-scores-list li .score {
     font-weight: bold;
     color: var(--secondary-color);
+}
+
+.popup-content .correct-order-display {
+    font-weight: bold;
+    color: var(--success-color);
+    background-color: #f0f8ff;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    direction: ltr; /* Ensure arrows point correctly */
+    text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 850px) {
+    body {
+        flex-direction: column;
+        align-items: center;
+        padding-top: 20px;
+        padding-bottom: 20px;
+    }
+
+    #game-container {
+        margin-right: 0;
+        margin-bottom: 20px;
+        width: 90%;
+    }
+
+    #leaderboard-container {
+        width: 90%;
+        max-width: 500px;
+    }
 } 

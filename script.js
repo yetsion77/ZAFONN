@@ -35,7 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let sortable;
     const MAX_HIGH_SCORES = 5;
 
-    const handcraftedLevels = {
+    let currentGameHandcraftedLevels = {};
+    const handcraftedLevelsSource = {
         1: ['מטולה', 'חיפה', 'תל אביב -יפו', 'באר שבע', 'אילת'],
         2: ['קצרין', 'כרמיאל', 'נתניה', 'אשקלון', 'שדרות'],
         3: ['צפת', 'עפולה', 'רעננה', 'רחובות', 'ירוחם'],
@@ -43,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         5: ['עכו', 'זכרון יעקב', 'נתניה', 'אשדוד', 'מצפה רמון'],
         6: ['ראש פינה', 'חדרה', 'ראשון לציון', 'קריית גת', 'דימונה']
     };
+    const allHandcraftedCities = Object.values(handcraftedLevelsSource).flat();
 
     const facts = {
         'אילת': 'העיר הדרומית ביותר בישראל, מהווה גשר יבשתי בין אסיה לאפריקה.',
@@ -74,6 +76,14 @@ document.addEventListener('DOMContentLoaded', () => {
         level = 1;
         score = 0;
         lives = 3;
+
+        // Shuffle the handcrafted levels for the new game
+        const shuffledCities = [...allHandcraftedCities].sort(() => Math.random() - 0.5);
+        currentGameHandcraftedLevels = {};
+        for (let i = 0; i < 6; i++) {
+            currentGameHandcraftedLevels[i + 1] = shuffledCities.slice(i * 5, (i + 1) * 5);
+        }
+
         updateStats();
         await displayHighScores();
         startGame();
@@ -83,6 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
         scoreEl.textContent = score;
         livesEl.textContent = lives;
         levelIndicatorEl.textContent = `שלב: ${level}`;
+        checkButton.disabled = false;
     }
 
     function startGame() {
@@ -93,10 +104,9 @@ document.addEventListener('DOMContentLoaded', () => {
         checkButton.disabled = false;
 
         currentLocalities = [];
-        let chosenNames = new Set();
-
-        if (handcraftedLevels[level]) {
-            const levelNames = handcraftedLevels[level];
+        
+        if (currentGameHandcraftedLevels[level]) {
+            const levelNames = currentGameHandcraftedLevels[level];
             currentLocalities = levelNames.map(name => localities.find(loc => loc.name === name)).filter(Boolean);
         } else {
             generateRandomLocalities();
@@ -246,9 +256,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const popupEl = document.createElement('div');
         popupEl.id = 'popup';
 
+        const correctOrder = [...currentLocalities].sort((a, b) => b.lat - a.lat);
+        const correctNames = correctOrder.map(loc => loc.name).join(' → ');
+
         popupEl.innerHTML = `
             <div class="popup-content">
                 <h2>המשחק נגמר!</h2>
+                <p>הסדר הנכון היה:</p>
+                <p class="correct-order-display">${correctNames}</p>
                 <p>הניקוד הסופי שלך: ${score}</p>
                 <input type="text" id="player-name" placeholder="הכנס את שמך" style="width: 80%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc;">
                 <button id="save-score-button">שמור תוצאה</button>
