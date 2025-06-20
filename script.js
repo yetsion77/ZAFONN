@@ -29,6 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const livesEl = document.getElementById('lives');
     const highScoresListEl = document.getElementById('high-scores-list');
 
+    checkButton.addEventListener('click', checkAnswer);
+
     let level, score, lives;
     const itemsPerLevel = 5;
     let currentLocalities = [];
@@ -60,17 +62,18 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     const tier2Source = [
-        'שלומי', 'מעלות-תרשיחא', 'כפר ורדים', 'קריית ים', 'קריית מוצקין', 'קריית ביאליק', 'טירת כרמל', 'נשר', 'יקנעם עילית', 'קריית טבעון', 'רמת ישי', 'מגדל העמק', 'בית שאן', 'דלית אל-כרמל', 'עספיא',
-        'אור עקיבא', 'פרדס חנה-כרכור', 'בנימינה-גבעת עדה', 'כפר יונה', 'תל מונד', 'אבן יהודה', 'כפר סבא', 'הוד השרון', 'רמת השרון', 'לוד', 'רמלה', 'חולון', 'בת ים', 'רמת גן', 'גבעתיים', 'בני ברק', 'יהוד-מונוסון', 'אור יהודה', 'גבעת שמואל', 'קריית אונו', 'נס ציונה', 'יבנה', 'גדרה',
-        'מבשרת ציון', 'מעלה אדומים',
-        'אופקים', 'נתיבות', 'קריית מלאכי', 'להבים', 'עומר', 'מיתר', 'רהט'
+        'שלומי', 'מעלות-תרשיחא', 'כפר ורדים', 'קריית ים', 'קריית מוצקין', 'קריית ביאליק', 'טירת כרמל', 'נשר', 'יקנעם עילית', 'קריית טבעון', 'רמת ישי', 'מגדל העמק', 'בית שאן', 'עספיא', 'אור עקיבא', 
+        'פרדס חנה-כרכור', 'כפר יונה', 'תל מונד', 'אבן יהודה', 'כפר סבא', 'הוד השרון', 'רמת השרון', 'לוד', 'רמלה', 'חולון', 'בת ים', 'רמת גן', 'גבעתיים', 'בני ברק', 'אור יהודה', 'גבעת שמואל', 'קריית אונו', 
+        'נס ציונה', 'יבנה', 'גדרה', 'מזכרת בתיה', 'מבשרת ציון', 'מעלה אדומים', 'אופקים', 'נתיבות', 'קריית מלאכי', 'להבים', 'עומר', 'מיתר', 'רהט',
+        'אריאל', 'גני תקווה', 'טירה', 'כפר קאסם', 'אורנית', 'קריית עקרון'
     ];
 
     const tier3Source = [
-        'דן', 'דפנה', 'כפר גלעדי', 'כפר בלום', 'שדה נחמיה', 'יסוד המעלה', 'עין גב', 'דגניה א\'', 'אפיקים', 'כפר תבור', 'נהלל', 'שדה אליהו',
+        'דן', 'דפנה', 'כפר גלעדי', 'כפר בלום', 'שדה נחמיה', 'יסוד המעלה', 'עין גב', "דגניה א'", 'אפיקים', 'כפר תבור', 'נהלל', 'שדה אליהו',
         'קיסריה', 'מעגן מיכאל', 'שפיים', 'געש', 'כפר שמריהו', 'סביון', 'שוהם', 'בית דגן', 'פלמחים', 'ניצנים', 'כפר חב"ד',
         'אבו גוש', 'צור הדסה', 'הר אדר', 'נווה אילן', 'קריית ענבים',
-        'יד מרדכי', 'נתיב העשרה', 'ניר עם', 'מפלסים', 'כפר עזה', 'סעד', 'בארי', 'רעים', 'נירים', 'כיסופים', 'שדה בוקר', 'משאבי שדה', 'צאלים', 'גבולות'
+        'יד מרדכי', 'נתיב העשרה', 'ניר עם', 'מפלסים', 'כפר עזה', 'סעד', 'בארי', 'רעים', 'נירים', 'כיסופים', 'שדה בוקר', 'משאבי שדה', 'צאלים', 'גבולות', 'עין גדי',
+        'נחשולים', 'הזורע'
     ];
     
     const facts = {
@@ -103,13 +106,48 @@ document.addEventListener('DOMContentLoaded', () => {
         level = 1;
         score = 0;
         lives = 3;
-
-        tier1Shuffled = [...tier1Source].sort(() => Math.random() - 0.5);
-        tier2Shuffled = [...tier2Source].sort(() => Math.random() - 0.5);
-        tier3Shuffled = [...tier3Source].sort(() => Math.random() - 0.5);
         tier1Index = 0;
         tier2Index = 0;
         tier3Index = 0;
+
+        // Shuffle tiers at the beginning
+        tier1Shuffled = [...tier1Source].sort(() => Math.random() - 0.5);
+        tier2Shuffled = [...tier2Source].sort(() => Math.random() - 0.5);
+        tier3Shuffled = [...tier3Source].sort(() => Math.random() - 0.5);
+
+        // Check for debug mode via URL parameter to jump to a level
+        const urlParams = new URLSearchParams(window.location.search);
+        const startLevelParam = urlParams.get('level');
+        
+        if (startLevelParam) {
+            const startLevel = parseInt(startLevelParam, 10);
+            if (!isNaN(startLevel) && startLevel > 1) {
+                if (DEBUG_MODE) console.warn(`DEBUG MODE: Jumping to level ${startLevel}`);
+                level = startLevel;
+                let levelsToSkip = startLevel - 1;
+
+                // Fast-forward through tiers
+                const tier1LevelsAvailable = Math.floor(tier1Shuffled.length / itemsPerLevel);
+                const tier1LevelsToSkip = Math.min(levelsToSkip, tier1LevelsAvailable);
+                tier1Index = tier1LevelsToSkip * itemsPerLevel;
+                levelsToSkip -= tier1LevelsToSkip;
+
+                if (levelsToSkip > 0) {
+                    const tier2LevelsAvailable = Math.floor(tier2Shuffled.length / itemsPerLevel);
+                    const tier2LevelsToSkip = Math.min(levelsToSkip, tier2LevelsAvailable);
+                    tier2Index = tier2LevelsToSkip * itemsPerLevel;
+                    levelsToSkip -= tier2LevelsToSkip;
+                }
+                
+                if (levelsToSkip > 0) {
+                    const tier3LevelsAvailable = Math.floor(tier3Shuffled.length / itemsPerLevel);
+                    const tier3LevelsToSkip = Math.min(levelsToSkip, tier3LevelsAvailable);
+                    tier3Index = tier3LevelsToSkip * itemsPerLevel;
+                    // levelsToSkip is not used after this, but good practice
+                    levelsToSkip -= tier3LevelsToSkip; 
+                }
+            }
+        }
 
         updateStats();
         await displayHighScores();
@@ -134,15 +172,15 @@ document.addEventListener('DOMContentLoaded', () => {
         let levelNames = [];
 
         // Try to get a level from the tiers in order.
-        if (tier1Index < tier1Shuffled.length) {
+        if (tier1Index + itemsPerLevel <= tier1Shuffled.length) {
             if (DEBUG_MODE) console.log(`Serving level from Tier 1`);
             levelNames = tier1Shuffled.slice(tier1Index, tier1Index + itemsPerLevel);
             tier1Index += itemsPerLevel;
-        } else if (tier2Index < tier2Shuffled.length) {
+        } else if (tier2Index + itemsPerLevel <= tier2Shuffled.length) {
             if (DEBUG_MODE) console.log(`Serving level from Tier 2`);
             levelNames = tier2Shuffled.slice(tier2Index, tier2Index + itemsPerLevel);
             tier2Index += itemsPerLevel;
-        } else if (tier3Index < tier3Shuffled.length) {
+        } else if (tier3Index + itemsPerLevel <= tier3Shuffled.length) {
             if (DEBUG_MODE) console.log(`Serving level from Tier 3`);
             levelNames = tier3Shuffled.slice(tier3Index, tier3Index + itemsPerLevel);
             tier3Index += itemsPerLevel;
@@ -164,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function generateRandomLocalities() {
-        if (DEBUG_MODE) console.log(`Generating hard random level ${level} using slicing method.`);
+        if (DEBUG_MODE) console.log(`Generating hard random level ${level} using a new spread-out method.`);
         
         const allTieredLocalities = new Set([...tier1Source, ...tier2Source, ...tier3Source]);
         const randomPool = localities.filter(loc => !allTieredLocalities.has(loc.name));
@@ -172,20 +210,32 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalLocalities = randomPool.length;
         if (totalLocalities < itemsPerLevel) {
             if (DEBUG_MODE) console.log("Not enough unique random localities left, game might end.");
-            currentLocalities = []; // Or handle game completion
+            currentLocalities = [];
             return;
         }
 
-        // The old difficulty logic applied to the new, smaller pool of random localities
-        const tierLevels = Math.ceil(tier1Source.length/5) + Math.ceil(tier2Source.length/5) + Math.ceil(tier3Source.length/5);
-        const difficultyFactor = (level - tierLevels) * 20;
-        const minSliceSize = 80;
-        const sliceSize = Math.max(totalLocalities - difficultyFactor, minSliceSize);
-        const start = Math.floor(Math.random() * (totalLocalities - sliceSize));
-        const selectionPool = randomPool.slice(start, start + sliceSize);
+        // New logic: Pick one from each of 5 zones to ensure spread.
+        const selectedForLevel = new Set();
+        const zones = itemsPerLevel;
+        const zoneSize = Math.floor(totalLocalities / zones);
 
-        const shuffledPool = [...selectionPool].sort(() => 0.5 - Math.random());
-        currentLocalities = shuffledPool.slice(0, itemsPerLevel);
+        for (let i = 0; i < zones; i++) {
+            const start = i * zoneSize;
+            const end = (i === zones - 1) ? totalLocalities : start + zoneSize;
+            
+            const randomIndex = start + Math.floor(Math.random() * (end - start));
+            selectedForLevel.add(randomPool[randomIndex]);
+        }
+        
+        currentLocalities = Array.from(selectedForLevel);
+        
+        // Fallback to ensure we always have 5, though it's unlikely to be needed with the Set logic.
+        while (currentLocalities.length < itemsPerLevel && currentLocalities.length < totalLocalities) {
+            const randomLoc = randomPool[Math.floor(Math.random() * totalLocalities)];
+            if (!currentLocalities.some(l => l.name === randomLoc.name)) {
+                 currentLocalities.push(randomLoc);
+            }
+        }
     }
 
     function displayLocalities() {
@@ -248,29 +298,25 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function showSuccessPopup() {
         const popupEl = document.createElement('div');
-        popupEl.id = 'popup';
-        
-        const factLocality = currentLocalities.find(loc => facts[loc.name]);
-        let infoText = `עברתם את שלב ${level}! מוכנים לשלב הבא?`;
+        popupEl.className = 'popup-overlay';
 
-        if (factLocality) {
-            infoText = `<b>${factLocality.name}:</b> ${facts[factLocality.name]}<br><br>${infoText}`;
+        // Pick a random locality from the current level that has a fact
+        const localitiesWithFacts = currentLocalities.filter(loc => facts[loc.name]);
+        let factText = "כל הכבוד! הצלחתם למקם נכון את כל היישובים.";
+        if (localitiesWithFacts.length > 0) {
+            const randomLocality = localitiesWithFacts[Math.floor(Math.random() * localitiesWithFacts.length)];
+            factText = `<strong>הידעת?</strong> ${facts[randomLocality.name]}`;
         }
 
         popupEl.innerHTML = `
             <div class="popup-content">
-                <span class="close-button">&times;</span>
-                <h2>כל הכבוד!</h2>
-                <p id="popup-info">${infoText}</p>
+                <h2>שלב הושלם!</h2>
+                <p>${factText}</p>
                 <button id="next-level-button">לשלב הבא</button>
             </div>
         `;
         
         document.body.appendChild(popupEl);
-
-        popupEl.querySelector('.close-button').addEventListener('click', () => {
-            document.body.removeChild(popupEl);
-        });
 
         popupEl.querySelector('#next-level-button').addEventListener('click', () => {
             document.body.removeChild(popupEl);
@@ -280,16 +326,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function gameOver() {
         checkButton.disabled = true;
-        feedbackEl.textContent = 'המשחק נגמר!';
-        showGameOverPopup();
+        const userSortedNames = [...localitiesListEl.children].map(li => li.textContent);
+        const correctOrder = [...currentLocalities].sort((a, b) => b.lat - a.lat).map(loc => loc.name);
+        
+        showGameOverPopup(userSortedNames, correctOrder);
     }
-
-    function showGameOverPopup() {
+    
+    function showGameOverPopup(userOrder, correctOrder) {
         const popupEl = document.createElement('div');
-        popupEl.id = 'popup';
-
-        const correctOrder = [...currentLocalities].sort((a, b) => b.lat - a.lat);
-        const correctNames = correctOrder.map(loc => loc.name).join(' ← ');
+        popupEl.className = 'popup-overlay';
+        const correctNames = correctOrder.join(' ← ');
 
         popupEl.innerHTML = `
             <div class="popup-content">
@@ -360,4 +406,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     checkButton.addEventListener('click', checkAnswer);
     initGame();
-}); 
+});
