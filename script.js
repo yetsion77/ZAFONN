@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'ירוחם': 'העיירה הראשונה שהוקמה בנגב לאחר קום המדינה, בשנת 1951.',
         'דימונה': 'נוסדה כעיירת פיתוח ב-1955, ומוכרת בזכות הקריה למחקר גרעיני הסמוכה לה.',
         'ערד': 'עיר מתוכננת שנוסדה ב-1962, ידועה באוויר הנקי והיבש שלה.',
-        'ירושלים': 'בירת ישראל והעיר הגדולה ביותר במדינה. קדושה לשלוש הדתות המונותאיסטיות הגדולות.',
+        'ירושלים': 'בירת ישראל והעיר הגדולה ביותר במדינה.',
         'תל אביב -יפו': 'המרכז הכלכלי והתרבותי של ישראל. "העיר הלבנה" שלה הוכרזה כאתר מורשת עולמית.',
         'חיפה': 'עיר נמל מרכזית וביתם של הגנים הבהאיים המרהיבים, אתר מורשת עולמית של אונסק"ו.',
         'צפת': 'אחת מארבע ערי הקודש, ונחשבת למרכז עולמי של תורת הקבלה.',
@@ -305,12 +305,12 @@ document.addEventListener('DOMContentLoaded', () => {
         let factText = "כל הכבוד! הצלחתם למקם נכון את כל היישובים.";
         if (localitiesWithFacts.length > 0) {
             const randomLocality = localitiesWithFacts[Math.floor(Math.random() * localitiesWithFacts.length)];
-            factText = `<strong>הידעת?</strong> ${facts[randomLocality.name]}`;
+            factText = `<strong>${randomLocality.name}:</strong> ${facts[randomLocality.name]}`;
         }
 
         popupEl.innerHTML = `
             <div class="popup-content">
-                <h2>שלב הושלם!</h2>
+                <h2>השלב הושלם!</h2>
                 <p>${factText}</p>
                 <button id="next-level-button">לשלב הבא</button>
             </div>

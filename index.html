@@ -4,38 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>אל תאבדו את הצפון</title>
-    <link rel="stylesheet" href="style.css?v=1.0">
+    <link rel="stylesheet" href="style.css?v=1.2">
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="game-container">
-        <header>
-            <h1>אל תאבדו את הצפון</h1>
-            <p>סדרו את היישובים מהצפוני ביותר לדרומי ביותר.</p>
-            <div id="game-stats">
-                <div id="score-container">ניקוד: <span id="score">0</span></div>
-                <div id="level-indicator">שלב: 1</div>
-                <div id="lives-container">חיים: <span id="lives">3</span></div>
-            </div>
-        </header>
-        <main>
-            <ul id="localities-list">
-                <!-- היישובים יופיעו כאן -->
-            </ul>
-            <button id="check-button" type="button">בדיקה</button>
-            <p id="feedback"></p>
-        </main>
-    </div>
+    <div id="app-container">
+        <div id="game-container">
+            <header>
+                <h1>אל תאבדו את הצפון</h1>
+                <p>סדרו את היישובים מהצפוני ביותר לדרומי ביותר.<br><strong>צאו לדרך!</strong></p>
+                <div id="game-stats">
+                    <div id="score-container">ניקוד: <span id="score">0</span></div>
+                    <div id="level-indicator">שלב: 1</div>
+                    <div id="lives-container">חיים: <span id="lives">3</span></div>
+                </div>
+            </header>
+            <main>
+                <ul id="localities-list">
+                    <!-- היישובים יופיעו כאן -->
+                </ul>
+                <button id="check-button" type="button">בדיקה</button>
+                <p id="feedback"></p>
+            </main>
+        </div>
 
-    <div id="leaderboard-container">
-        <h2>טבלת השיאים</h2>
-        <ol id="high-scores-list">
-            <!-- רשימת השיאים תופיע כאן -->
-        </ol>
+        <div id="leaderboard-container">
+            <h2>טבלת השיאים</h2>
+            <ol id="high-scores-list">
+                <!-- רשימת השיאים תופיע כאן -->
+            </ol>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="localities.js?v=1.0"></script>
-    <script type="module" src="script.js?v=1.1"></script>
+    <script type="module" src="script.js?v=1.2"></script>
 </body>
 </html> 
